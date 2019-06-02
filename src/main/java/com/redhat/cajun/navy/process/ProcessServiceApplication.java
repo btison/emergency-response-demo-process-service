@@ -7,7 +7,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,7 +14,7 @@ import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 
 @SpringBootApplication
 @ComponentScan
-@EnableAutoConfiguration(exclude = { KafkaAutoConfiguration.class })
+@EnableAutoConfiguration
 public class ProcessServiceApplication {
 
     private final static Logger log = LoggerFactory.getLogger(ProcessServiceApplication.class);
