@@ -4,10 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.redhat.cajun.navy.process.message.model.Message;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.kafka.spring.TracingConsumerFactory;
+import io.opentracing.contrib.kafka.spring.TracingProducerFactory;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,13 +40,16 @@ public class KafkaConfiguration {
     @Value(value = "${kafka.concurrency}")
     private Integer concurrency;
 
+    @Autowired
+    private Tracer tracer;
+
     @Bean
     public ProducerFactory<String, Message<?>> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps);
+        return new TracingProducerFactory<>(new DefaultKafkaProducerFactory<>(configProps), tracer);
     }
 
     @Bean
@@ -59,7 +66,7 @@ public class KafkaConfiguration {
         configProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, Boolean.FALSE);
-        return new DefaultKafkaConsumerFactory<>(configProps);
+        return new TracingConsumerFactory<>(new DefaultKafkaConsumerFactory<>(configProps), tracer);
     }
 
     @Bean

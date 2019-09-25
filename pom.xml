@@ -26,6 +26,8 @@
     <version.cajun-navy-rules>1.1.0-SNAPSHOT</version.cajun-navy-rules>
     <version.incident-process>1.1.0-SNAPSHOT</version.incident-process>
     <version.wiremock>2.6.0</version.wiremock>
+    <version.jaeger-spring>3.1.2</version.jaeger-spring>
+    <version.opentracing-kafka>0.1.13</version.opentracing-kafka>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -153,6 +155,17 @@
       <artifactId>incident-process</artifactId>
       <version>${version.incident-process}</version>
     </dependency>
+    <dependency>
+      <groupId>io.opentracing.contrib</groupId>
+      <artifactId>opentracing-kafka-spring</artifactId>
+      <version>${version.opentracing-kafka}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.opentracing.contrib</groupId>
+      <artifactId>opentracing-spring-jaeger-starter</artifactId>
+      <version>${version.jaeger-spring}</version>
+    </dependency>
+
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
