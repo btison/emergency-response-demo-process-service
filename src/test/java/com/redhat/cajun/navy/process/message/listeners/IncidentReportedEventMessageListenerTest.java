@@ -8,19 +8,20 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.hamcrest.CoreMatchers.is;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -28,7 +29,8 @@ import com.redhat.cajun.navy.process.wih.GetSheltersRestWorkItemHandler;
 import com.redhat.cajun.navy.rules.model.Destination;
 import com.redhat.cajun.navy.rules.model.Destinations;
 import com.redhat.cajun.navy.rules.model.Incident;
-
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
 import org.jbpm.process.instance.ProcessInstance;
@@ -98,12 +100,11 @@ public class IncidentReportedEventMessageListenerTest {
         setField(messageListener, null, processService, ProcessService.class);
         setField(messageListener, "processId", processId, String.class);
         setField(messageListener, "assignmentDelay", "PT30S", String.class);
-
         wih = new GetSheltersRestWorkItemHandler();
         setField(wih, "disasterServiceScheme", "http", null);
         setField(wih, "disasterServiceUrl", "localhost:" + wireMockRule.port(), null);
         setField(wih, "sheltersPath", "/shelters", null);
-
+        setField(messageListener, null, GlobalTracer.get(), Tracer.class);
         when(ptm.getTransaction(any())).thenReturn(transactionStatus);
         when(processService.startProcess(any(), any(), any(), any())).thenReturn(100L);
     }
@@ -130,8 +131,8 @@ public class IncidentReportedEventMessageListenerTest {
                 "\"status\":\"REPORTED\"" +
                 "}}";
 
-        messageListener.processMessage(json, "incident123", "topic1", 1, ack);
-        
+        messageListener.processMessage(json, "incident123", "topic1", 1, new HashMap<String, Object>(), ack);
+
         verify(processService).startProcess(any(), processIdCaptor.capture(), correlationKeyCaptor.capture(), parametersCaptor.capture());
         assertThat(processIdCaptor.getValue(), equalTo(processId));
         CorrelationKey correlationKey = correlationKeyCaptor.getValue();
