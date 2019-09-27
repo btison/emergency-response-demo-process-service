@@ -12,9 +12,12 @@ import com.jayway.jsonpath.JsonPath;
 import com.redhat.cajun.navy.process.message.model.DestinationLocations;
 import com.redhat.cajun.navy.process.message.model.IncidentReportedEvent;
 import com.redhat.cajun.navy.process.message.model.Message;
+import com.redhat.cajun.navy.process.tracing.TracingUtils;
 import com.redhat.cajun.navy.rules.model.Destination;
 import com.redhat.cajun.navy.rules.model.Destinations;
 import com.redhat.cajun.navy.rules.model.Incident;
+import io.opentracing.Scope;
+import io.opentracing.Tracer;
 import org.jbpm.services.api.ProcessService;
 import org.kie.internal.KieInternalServices;
 import org.kie.internal.process.CorrelationKey;
@@ -27,6 +30,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -60,17 +64,24 @@ public class IncidentReportedEventMessageListener {
     @Autowired
     private DestinationLocations destinationLocations;
 
+    @Autowired
+    private Tracer tracer;
+
     @KafkaListener(topics = "${listener.destination.incident-reported-event}")
     public void processMessage(@Payload String messageAsJson, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key,
                                @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition, Acknowledgment ack) {
+                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                               @Headers Map<String, Object> headers, Acknowledgment ack) {
 
         if (!accept(messageAsJson)) {
             ack.acknowledge();
             return;
         }
         log.debug("Processing 'IncidentReportedEvent' message for incident " + key + " from topic:partition " + topic + ":" + partition);
-        doProcessMessage(messageAsJson, ack);
+
+        try (Scope scope = TracingUtils.buildChildSpan("processIncidentReportedEvent", headers, tracer)) {
+            doProcessMessage(messageAsJson, ack);
+        }
     }
 
     private void doProcessMessage(String messageAsJson, Acknowledgment ack) {

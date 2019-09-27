@@ -10,12 +10,15 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.redhat.cajun.navy.process.message.model.DestinationLocations;
 import com.redhat.cajun.navy.rules.model.Destination;
 import com.redhat.cajun.navy.rules.model.Destinations;
 import com.redhat.cajun.navy.rules.model.Incident;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.hamcrest.CoreMatchers;
 import org.jbpm.process.instance.ProcessInstance;
 import org.jbpm.services.api.ProcessService;
@@ -68,6 +71,7 @@ public class IncidentReportedEventMessageListenerTest {
         setField(messageListener, "processId", processId, String.class);
         setField(messageListener, "destinationLocations", destinationLocations(), DestinationLocations.class);
         setField(messageListener, "assignmentDelay", "PT30S", String.class);
+        setField(messageListener, null, GlobalTracer.get(), Tracer.class);
         when(ptm.getTransaction(any())).thenReturn(transactionStatus);
         when(processService.startProcess(any(), any(), any(), any())).thenReturn(100L);
 
@@ -87,7 +91,7 @@ public class IncidentReportedEventMessageListenerTest {
                 "\"timestamp\": 1521148332350" +
                 "}}";
 
-        messageListener.processMessage(json, "incident123", "topic1", 1, ack);
+        messageListener.processMessage(json, "incident123", "topic1", 1, new HashMap<String, Object>(), ack);
 
 
         verify(processService).startProcess(any(), processIdCaptor.capture(), correlationKeyCaptor.capture(), parametersCaptor.capture());
