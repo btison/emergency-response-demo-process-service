@@ -13,7 +13,8 @@ import com.jayway.jsonpath.JsonPath;
 import com.redhat.cajun.navy.process.message.model.DestinationLocations;
 import com.redhat.cajun.navy.process.message.model.IncidentReportedEvent;
 import com.redhat.cajun.navy.process.message.model.Message;
-import com.redhat.cajun.navy.process.tracing.TracingUtils;
+import com.redhat.cajun.navy.process.tracing.KafkaTracingUtils;
+import com.redhat.cajun.navy.process.tracing.ProcessTracingUtils;
 import com.redhat.cajun.navy.rules.model.Destination;
 import com.redhat.cajun.navy.rules.model.Destinations;
 import com.redhat.cajun.navy.rules.model.Incident;
@@ -78,10 +79,12 @@ public class IncidentReportedEventMessageListener {
         }
         log.debug("Processing 'IncidentReportedEvent' message for incident " + key + " from topic:partition " + topic + ":" + partition);
 
-        Span span =  TracingUtils.buildChildSpan("processIncidentReportedEvent", headers, tracer);
+        Span span = KafkaTracingUtils.buildChildSpan("processIncidentReportedEvent", headers, tracer);
+        Scope scope = tracer.activateSpan(span);
         try {
             doProcessMessage(messageAsJson, ack);
         } finally {
+            scope.close();
             span.finish();
         }
     }
@@ -106,6 +109,8 @@ public class IncidentReportedEventMessageListener {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("incident", incident);
             parameters.put("assignmentDelay", assignmentDelay);
+
+            ProcessTracingUtils.injectInProcessInstance(tracer.activeSpan().context(), parameters, tracer);
 
             CorrelationKey correlationKey = correlationKeyFactory.newCorrelationKey(incidentId);
 
