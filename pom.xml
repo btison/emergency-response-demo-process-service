@@ -28,6 +28,7 @@
     <version.wiremock>2.6.0</version.wiremock>
     <version.jaeger-spring>3.1.2</version.jaeger-spring>
     <version.opentracing-kafka>0.1.13</version.opentracing-kafka>
+    <version.opentracing-spring>3.0.1</version.opentracing-spring>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -165,7 +166,11 @@
       <artifactId>opentracing-spring-jaeger-starter</artifactId>
       <version>${version.jaeger-spring}</version>
     </dependency>
-
+    <dependency>
+      <groupId>io.opentracing.contrib</groupId>
+      <artifactId>opentracing-spring-web</artifactId>
+      <version>${version.opentracing-spring}</version>
+    </dependency>
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
