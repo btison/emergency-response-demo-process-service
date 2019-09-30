@@ -17,8 +17,6 @@ public class KafkaTracingUtils {
 
         SpanContext parentContext = extractSpanContext(headers, tracer);
 
-        System.out.println("SpanContext = " + parentContext);
-
         Tracer.SpanBuilder spanBuilder = spanBuilder(operationName, tracer);
         if (parentContext != null) {
             spanBuilder.addReference(References.CHILD_OF, parentContext);
@@ -35,11 +33,5 @@ public class KafkaTracingUtils {
     private static SpanContext extractSpanContext(Map<String, Object> headers, Tracer tracer) {
         return tracer
                 .extract(Format.Builtin.TEXT_MAP, new HeadersMapExtractAdapter(headers));
-    }
-
-    public static void injectInProcessInstance(SpanContext spanContext, Map<String, Object> processVariables,
-                       Tracer tracer) {
-        tracer.inject(spanContext, Format.Builtin.TEXT_MAP,
-                new ProcessVariablesMapInjectAdapter(processVariables));
     }
 }

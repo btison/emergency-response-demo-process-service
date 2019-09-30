@@ -1,16 +1,20 @@
 package com.redhat.cajun.navy.process.wih;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.redhat.cajun.navy.process.tracing.TracingRestTemplateInterceptor;
 import com.redhat.cajun.navy.rules.model.Incident;
 import com.redhat.cajun.navy.rules.model.IncidentPriority;
+import io.opentracing.Tracer;
 import org.kie.api.runtime.process.WorkItem;
 import org.kie.api.runtime.process.WorkItemHandler;
 import org.kie.api.runtime.process.WorkItemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -32,6 +36,9 @@ public class GetIncidentPriorityRestWorkItemHandler implements WorkItemHandler {
     @Value("${incident-priority.service.incident-priority-path}")
     private String incidentPriorityPath;
 
+    @Autowired
+    private Tracer tracer;
+
     @Override
     public void executeWorkItem(WorkItem workItem, WorkItemManager manager) {
 
@@ -40,7 +47,10 @@ public class GetIncidentPriorityRestWorkItemHandler implements WorkItemHandler {
             throw new IllegalStateException("Parameter 'Incident' cannot be null and must be of type com.redhat.cajun.navy.rules.model.Incident");
         }
         Incident incident = (Incident) incidentObj;
+
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setInterceptors(Collections.singletonList(new TracingRestTemplateInterceptor(tracer, workItem.getParameters())));
+
         IncidentPriority incidentPriority;
         try {
             RestIncidentPriority ip = restTemplate.exchange(serviceScheme + "://" + serviceUrl + incidentPriorityPath,
