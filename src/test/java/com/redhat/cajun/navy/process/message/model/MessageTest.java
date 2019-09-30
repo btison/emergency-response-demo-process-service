@@ -19,8 +19,6 @@ public class MessageTest {
 
         String messageAsJson = mapper.writeValueAsString(message);
 
-        System.out.println(messageAsJson);
-
         assertThat(messageAsJson, containsString("testType"));
         assertThat(messageAsJson, not(containsString("header")));
     }

@@ -16,4 +16,8 @@ public class ProcessTracingUtils {
                 new ProcessVariablesMapInjectAdapter(processVariables));
     }
 
+    public static SpanContext extractSpanContext(Map<String, Object> processvariables, Tracer tracer) {
+        return tracer.extract(Format.Builtin.TEXT_MAP, new ProcessVariablesMapExtractAdapter(processvariables));
+    }
+
 }

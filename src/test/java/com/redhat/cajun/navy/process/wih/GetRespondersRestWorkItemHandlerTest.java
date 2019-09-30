@@ -28,6 +28,8 @@ import java.util.Map;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.redhat.cajun.navy.rules.model.Responder;
 import com.redhat.cajun.navy.rules.model.Responders;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -62,6 +64,7 @@ public class GetRespondersRestWorkItemHandlerTest {
         setField(wih, "responderServiceUrl", "localhost:" + wireMockRule.port(), null);
         setField(wih, "availableRespondersPath", "/responders/available", null);
         setField(wih, "availableRespondersLimit", 100, null);
+        setField(wih, null, GlobalTracer.get(), Tracer.class);
         when(workItem.getId()).thenReturn(1L);
     }
 

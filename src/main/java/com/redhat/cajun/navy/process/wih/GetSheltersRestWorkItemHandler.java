@@ -1,18 +1,20 @@
 package com.redhat.cajun.navy.process.wih;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import com.redhat.cajun.navy.process.tracing.TracingRestTemplateInterceptor;
 import com.redhat.cajun.navy.rules.model.Destination;
 import com.redhat.cajun.navy.rules.model.Destinations;
-
+import io.opentracing.Tracer;
 import org.kie.api.runtime.process.WorkItem;
 import org.kie.api.runtime.process.WorkItemHandler;
 import org.kie.api.runtime.process.WorkItemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -37,11 +39,14 @@ public class GetSheltersRestWorkItemHandler implements WorkItemHandler {
     @Value("${disaster.service.shelters-path}")
     private String sheltersPath;
 
+    @Autowired
+    private Tracer tracer;
 
     @Override
     public void executeWorkItem(WorkItem workItem, WorkItemManager manager) {
 
         RestTemplate restTemplate = new RestTemplate();
+        restTemplate.setInterceptors(Collections.singletonList(new TracingRestTemplateInterceptor(tracer, workItem.getParameters())));
         Destinations destinations;
         try {
             UriComponents uriComponents = UriComponentsBuilder.newInstance().scheme(disasterServiceScheme)

@@ -107,6 +107,7 @@ public class IncidentReportedEventMessageListenerTest {
         setField(messageListener, null, GlobalTracer.get(), Tracer.class);
         when(ptm.getTransaction(any())).thenReturn(transactionStatus);
         when(processService.startProcess(any(), any(), any(), any())).thenReturn(100L);
+        setField(wih, null, GlobalTracer.get(), Tracer.class);
     }
 
     @Test

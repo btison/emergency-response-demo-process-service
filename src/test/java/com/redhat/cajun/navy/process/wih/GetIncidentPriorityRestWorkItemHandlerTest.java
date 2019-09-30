@@ -21,6 +21,8 @@ import java.util.Map;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.redhat.cajun.navy.rules.model.Incident;
 import com.redhat.cajun.navy.rules.model.IncidentPriority;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,6 +57,7 @@ public class GetIncidentPriorityRestWorkItemHandlerTest {
         ReflectionTestUtils.setField(wih, "serviceScheme", "http", null);
         ReflectionTestUtils.setField(wih, "serviceUrl", "localhost:" + wireMockRule.port(), null);
         ReflectionTestUtils.setField(wih, "incidentPriorityPath", "/priority/{incidentId}", null);
+        ReflectionTestUtils.setField(wih, null, GlobalTracer.get(), Tracer.class);
         when(workItem.getId()).thenReturn(1L);
     }
 
