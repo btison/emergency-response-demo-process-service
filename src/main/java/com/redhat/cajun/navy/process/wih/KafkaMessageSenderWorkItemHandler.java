@@ -7,6 +7,10 @@ import java.util.function.BiFunction;
 import javax.annotation.PostConstruct;
 
 import com.redhat.cajun.navy.process.message.model.Message;
+import com.redhat.cajun.navy.process.tracing.ProcessTracingUtils;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -30,6 +34,9 @@ public class KafkaMessageSenderWorkItemHandler implements WorkItemHandler {
     @Autowired
     private KafkaTemplate<String, Message<?>> kafkaTemplate;
 
+    @Autowired
+    private Tracer tracer;
+
     @Value("${sender.destination.create-mission-command}")
     private String createMissionCommandDestination;
 
@@ -47,24 +54,34 @@ public class KafkaMessageSenderWorkItemHandler implements WorkItemHandler {
     @Override
     @SuppressWarnings("unchecked")
     public void executeWorkItem(WorkItem workItem, WorkItemManager manager) {
-        Map<String, Object> parameters = workItem.getParameters();
-        Object messageType = parameters.get("MessageType");
-        if (!(messageType instanceof String)) {
-            throw new IllegalStateException("Parameter 'messageType' cannot be null and must be of type String");
+
+        Span span = ProcessTracingUtils.buildChildSpan(workItem.getName(), workItem.getParameters(), tracer);
+        Scope scope = tracer.activateSpan(span);
+        try {
+
+            Map<String, Object> parameters = workItem.getParameters();
+            Object messageType = parameters.get("MessageType");
+            if (!(messageType instanceof String)) {
+                throw new IllegalStateException("Parameter 'messageType' cannot be null and must be of type String");
+            }
+            Triple<String, String, BiFunction<String, Map<String, Object>, Pair<String, Message<?>>>> messagetypeDestinationBuilderTuple = payloadBuilders.get(messageType);
+            if (messagetypeDestinationBuilderTuple == null) {
+                throw new IllegalStateException("No builder found for payload '" + messageType + "'");
+            }
+
+            parameters.put("processId", Long.toString(workItem.getProcessInstanceId()));
+
+            Pair<String, Message<?>> keyAndMessagePair = messagetypeDestinationBuilderTuple.getRight()
+                    .apply(messagetypeDestinationBuilderTuple.getLeft(), parameters);
+
+            send(messagetypeDestinationBuilderTuple.getMiddle(), keyAndMessagePair.getLeft(), keyAndMessagePair.getRight());
+            manager.completeWorkItem(workItem.getId(), Collections.emptyMap());
+        } catch (Exception e) {
+            span.log("Exception: " + e.getMessage() );
+        } finally {
+            scope.close();
+            span.finish();
         }
-        Triple<String, String, BiFunction<String, Map<String, Object>, Pair<String, Message<?>>>> messagetypeDestinationBuilderTuple = payloadBuilders
-                .get(messageType);
-        if (messagetypeDestinationBuilderTuple == null) {
-            throw new IllegalStateException("No builder found for payload '" + messageType + "'");
-        }
-
-        parameters.put("processId", Long.toString(workItem.getProcessInstanceId()));
-
-        Pair<String, Message<?>> keyAndMessagePair = messagetypeDestinationBuilderTuple.getRight()
-                .apply(messagetypeDestinationBuilderTuple.getLeft(), parameters);
-
-        send(messagetypeDestinationBuilderTuple.getMiddle(), keyAndMessagePair.getLeft(), keyAndMessagePair.getRight());
-        manager.completeWorkItem(workItem.getId(), Collections.emptyMap());
     }
 
     private void send(String destination, String key, Message<?> msg) {
