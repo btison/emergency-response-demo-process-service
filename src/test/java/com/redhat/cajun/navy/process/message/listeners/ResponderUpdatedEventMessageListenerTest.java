@@ -12,7 +12,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.Collections;
+import java.util.HashMap;
 
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.jbpm.process.instance.ProcessInstance;
 import org.jbpm.services.api.ProcessService;
 import org.jbpm.services.api.query.QueryResultMapper;
@@ -61,6 +64,7 @@ public class ResponderUpdatedEventMessageListenerTest {
         setField(messageListener, null, ptm, PlatformTransactionManager.class);
         setField(messageListener, null, processService, ProcessService.class);
         setField(messageListener, null, queryService, QueryService.class);
+        setField(messageListener, null, GlobalTracer.get(), Tracer.class);
         when(ptm.getTransaction(any())).thenReturn(transactionStatus);
         when(processInstance.getId()).thenReturn(100L);
     }
@@ -90,7 +94,7 @@ public class ResponderUpdatedEventMessageListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("ResponderAvailable"));
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService).signalProcessInstance(100L, "ResponderAvailable", true);
         verify(processService).getProcessInstance(correlationKeyCaptor.capture());
@@ -125,7 +129,7 @@ public class ResponderUpdatedEventMessageListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("ResponderAvailable"));
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService).signalProcessInstance(100L, "ResponderAvailable", true);
         verify(processService).getProcessInstance(correlationKeyCaptor.capture());
@@ -159,7 +163,7 @@ public class ResponderUpdatedEventMessageListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("ResponderAvailable"));
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService).signalProcessInstance(100L, "ResponderAvailable", false);
         verify(processService).getProcessInstance(correlationKeyCaptor.capture());
@@ -189,7 +193,7 @@ public class ResponderUpdatedEventMessageListenerTest {
                 "\"available\" : false" +
                 "}" + "}" + "}";
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService, never()).signalProcessInstance(any(), any(), any());
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
@@ -222,7 +226,7 @@ public class ResponderUpdatedEventMessageListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.emptyList());
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService, never()).signalProcessInstance(any(), any(), any());
         verify(queryService, times(5))
@@ -251,7 +255,7 @@ public class ResponderUpdatedEventMessageListenerTest {
                 "\"available\" : false" +
                 "}" + "}" + "}";
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService, never()).signalProcessInstance(any(), any(), any());
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
@@ -265,7 +269,7 @@ public class ResponderUpdatedEventMessageListenerTest {
                 "\"field2\":\"calue2\"" +
                 "}";
 
-        messageListener.processMessage(json, "responderId", "test-topic", 1, ack);
+        messageListener.processMessage(json, "responderId", "test-topic", 1, new HashMap<>(), ack);
 
         verify(processService, never()).signalProcessInstance(any(), any(), any());
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));

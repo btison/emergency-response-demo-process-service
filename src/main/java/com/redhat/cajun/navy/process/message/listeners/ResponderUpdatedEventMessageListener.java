@@ -1,10 +1,16 @@
 package com.redhat.cajun.navy.process.message.listeners;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.redhat.cajun.navy.process.message.model.Message;
 import com.redhat.cajun.navy.process.message.model.ResponderUpdatedEvent;
+import com.redhat.cajun.navy.process.tracing.KafkaTracingUtils;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.jbpm.services.api.ProcessService;
 import org.jbpm.services.api.query.QueryService;
 import org.kie.api.runtime.process.ProcessInstance;
@@ -18,6 +24,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -42,12 +49,16 @@ public class ResponderUpdatedEventMessageListener {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private Tracer tracer;
+
     private CorrelationKeyFactory correlationKeyFactory = KieInternalServices.Factory.get().newCorrelationKeyFactory();
 
     @KafkaListener(topics = "${listener.destination.responder-updated-event}")
     public void processMessage(@Payload String messageAsJson, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key,
                                @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition, Acknowledgment ack) {
+                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                               @Headers Map<String, Object> headers, Acknowledgment ack) {
 
         if (!accept(messageAsJson)) {
             ack.acknowledge();
@@ -55,6 +66,16 @@ public class ResponderUpdatedEventMessageListener {
         }
 
         log.debug("Processing '" + TYPE_RESPONDER_UPDATED_EVENT + "' message for responder '" + key + "' from topic:partition '" + topic + ":" + partition + "'");
+        Span span = KafkaTracingUtils.buildChildSpan("processResponderUpdatedEvent", headers, tracer);
+        try(Scope scope = tracer.activateSpan(span)) {
+            doProcessMessage(messageAsJson, key, ack);
+        } finally {
+            span.finish();
+        }
+
+    }
+
+    private void doProcessMessage(String messageAsJson, String responder, Acknowledgment ack) {
 
         Message<ResponderUpdatedEvent> message;
         try {
@@ -72,7 +93,7 @@ public class ResponderUpdatedEventMessageListener {
 
             Boolean available = "success".equals(message.getBody().getStatus());
 
-            log.debug("Signaling process with correlationkey '" + correlationKey + ". Responder '" + key + "', available '" + available + "'." );
+            log.debug("Signaling process with correlationkey '" + correlationKey + ". Responder '" + responder + "', available '" + available + "'." );
             final IntegerHolder holder = new IntegerHolder(5);
             while (holder.counting()) {
                 TransactionTemplate template = new TransactionTemplate(transactionManager);
