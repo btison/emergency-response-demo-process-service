@@ -26,6 +26,8 @@ import com.redhat.cajun.navy.process.message.model.UpdateResponderCommand;
 import com.redhat.cajun.navy.rules.model.Incident;
 import com.redhat.cajun.navy.rules.model.Mission;
 import com.redhat.cajun.navy.rules.model.Status;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
@@ -64,6 +66,7 @@ public class KafkaMessageSenderWorkItemHandlerTest {
         setField(wih, "updateResponderCommandDestination", "topic-responder-command", String.class);
         setField(wih, "updateIncidentCommandDestination", "topic-incident-command", String.class);
         setField(wih, "incidentAssignmentEventDestination", "topic-incident-event", String.class);
+        setField(wih, null, GlobalTracer.get(), Tracer.class);
         wih.init();
     }
 
