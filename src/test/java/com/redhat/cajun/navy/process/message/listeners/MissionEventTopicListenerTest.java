@@ -11,7 +11,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import java.util.Collections;
+import java.util.HashMap;
 
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.jbpm.process.instance.ProcessInstance;
 import org.jbpm.services.api.ProcessService;
 import org.jbpm.services.api.query.QueryResultMapper;
@@ -60,6 +63,7 @@ public class MissionEventTopicListenerTest {
         setField(messageListener, null, ptm, PlatformTransactionManager.class);
         setField(messageListener, null, processService, ProcessService.class);
         setField(messageListener, null, queryService, QueryService.class);
+        setField(messageListener, null, GlobalTracer.get(), Tracer.class);
         when(ptm.getTransaction(any())).thenReturn(transactionStatus);
         when(processInstance.getId()).thenReturn(100L);
     }
@@ -88,7 +92,7 @@ public class MissionEventTopicListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("MissionStarted"));
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService).getProcessInstance(correlationCaptor.capture());
         CorrelationKey correlationKey = correlationCaptor.getValue();
@@ -122,7 +126,7 @@ public class MissionEventTopicListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("MissionStarted"));
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService).getProcessInstance(correlationCaptor.capture());
         CorrelationKey correlationKey = correlationCaptor.getValue();
@@ -150,7 +154,7 @@ public class MissionEventTopicListenerTest {
                 "\"destinationLong\" : \"-79.98765\"" +
                 "}" + "}";
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
         verify(processService, never()).signalProcessInstance(any(), any(), any());
@@ -176,7 +180,7 @@ public class MissionEventTopicListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("VictimPickedUp"));
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService).getProcessInstance(correlationCaptor.capture());
         CorrelationKey correlationKey = correlationCaptor.getValue();
@@ -210,7 +214,7 @@ public class MissionEventTopicListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("VictimPickedUp"));
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService).getProcessInstance(correlationCaptor.capture());
         CorrelationKey correlationKey = correlationCaptor.getValue();
@@ -238,7 +242,7 @@ public class MissionEventTopicListenerTest {
                 "\"destinationLong\" : \"-79.98765\"" +
                 "}" + "}";
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
         verify(processService, never()).signalProcessInstance(any(), any(), any());
@@ -270,7 +274,7 @@ public class MissionEventTopicListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("VictimDelivered"));
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService).getProcessInstance(correlationCaptor.capture());
         CorrelationKey correlationKey = correlationCaptor.getValue();
@@ -304,7 +308,7 @@ public class MissionEventTopicListenerTest {
         when(queryService.query(anyString(), any(QueryResultMapper.class), any(QueryContext.class), any(QueryParam.class)))
                 .thenReturn(Collections.singletonList("VictimPickedUp"));
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService).getProcessInstance(correlationCaptor.capture());
         CorrelationKey correlationKey = correlationCaptor.getValue();
@@ -332,7 +336,7 @@ public class MissionEventTopicListenerTest {
                 "\"destinationLong\" : \"-79.98765\"" +
                 "}" + "}";
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
         verify(processService, never()).signalProcessInstance(any(), any(), any());
@@ -358,7 +362,7 @@ public class MissionEventTopicListenerTest {
                 "\"destinationLong\" : \"-79.98765\"" +
                 "}" + "}";
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
         verify(processService, never()).signalProcessInstance(any(), any(), any());
@@ -373,7 +377,7 @@ public class MissionEventTopicListenerTest {
                 "\"field2\":\"value2\"" +
                 "}";
 
-        messageListener.processMessage(json, "topic", 1, ack);
+        messageListener.processMessage(json, "topic", 1, new HashMap<String, Object>(), ack);
 
         verify(processService, never()).getProcessInstance(any(CorrelationKey.class));
         verify(processService, never()).signalProcessInstance(any(), any(), any());

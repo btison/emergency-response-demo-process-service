@@ -1,6 +1,7 @@
 package com.redhat.cajun.navy.process.message.listeners;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -10,6 +11,10 @@ import com.redhat.cajun.navy.process.message.model.Message;
 import com.redhat.cajun.navy.process.message.model.MissionStartedEvent;
 import com.redhat.cajun.navy.process.message.model.VictimDeliveredEvent;
 import com.redhat.cajun.navy.process.message.model.VictimPickedUpEvent;
+import com.redhat.cajun.navy.process.tracing.KafkaTracingUtils;
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.jbpm.services.api.ProcessService;
 import org.jbpm.services.api.query.QueryService;
 import org.kie.api.runtime.process.ProcessInstance;
@@ -23,6 +28,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -54,22 +60,31 @@ public class MissionEventTopicListener {
     @Autowired
     private PlatformTransactionManager transactionManager;
 
+    @Autowired
+    private Tracer tracer;
+
     @KafkaListener(topics = "${listener.destination.mission-event}")
     public void processMessage(@Payload String messageAsJson,
                                @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition, Acknowledgment ack) {
+                               @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+                               @Headers Map<String, Object> headers, Acknowledgment ack) {
 
         messageType(messageAsJson, ack).ifPresent(s -> {
-            switch (s) {
-                case TYPE_MISSION_STARTED_EVENT:
-                    processMissionStartedEvent(messageAsJson, topic, partition, ack);
-                    break;
-                case TYPE_MISSION_PICKEDUP_EVENT:
-                    processVictimPickedUpEvent(messageAsJson, topic, partition, ack);
-                    break;
-                case TYPE_MISSION_COMPLETED_EVENT:
-                    processVictimDeliveredEvent(messageAsJson, topic, partition, ack);
-                    break;
+            Span span = KafkaTracingUtils.buildChildSpan(s, headers, tracer);
+            try(Scope scope = tracer.activateSpan(span)) {
+                switch (s) {
+                    case TYPE_MISSION_STARTED_EVENT:
+                        processMissionStartedEvent(messageAsJson, topic, partition, ack);
+                        break;
+                    case TYPE_MISSION_PICKEDUP_EVENT:
+                        processVictimPickedUpEvent(messageAsJson, topic, partition, ack);
+                        break;
+                    case TYPE_MISSION_COMPLETED_EVENT:
+                        processVictimDeliveredEvent(messageAsJson, topic, partition, ack);
+                        break;
+                }
+            } finally {
+                span.finish();
             }
         });
     }
