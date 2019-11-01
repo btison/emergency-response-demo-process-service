@@ -89,7 +89,6 @@ public class IncidentReportedEventMessageListenerTest {
 
         messageListener.processMessage(json, "incident123", "topic1", 1, ack);
 
-
         verify(processService).startProcess(any(), processIdCaptor.capture(), correlationKeyCaptor.capture(), parametersCaptor.capture());
         assertThat(processIdCaptor.getValue(), equalTo(processId));
         CorrelationKey correlationKey = correlationKeyCaptor.getValue();
