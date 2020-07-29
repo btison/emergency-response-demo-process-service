@@ -24,7 +24,7 @@
     <version.commons-lang3>3.8.1</version.commons-lang3>
     <version.cajun-navy-rules-model>1.1.0-SNAPSHOT</version.cajun-navy-rules-model>
     <version.cajun-navy-rules>1.1.0-SNAPSHOT</version.cajun-navy-rules>
-    <version.incident-process>1.1.0-SNAPSHOT</version.incident-process>
+    <version.incident-process>1.1.1-SNAPSHOT</version.incident-process>
     <version.wiremock>2.6.0</version.wiremock>
     <version.jaeger-spring>3.1.2</version.jaeger-spring>
     <version.opentracing-kafka>0.1.13</version.opentracing-kafka>
