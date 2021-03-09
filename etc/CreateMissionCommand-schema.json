@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://erdemo.io/CreateMissionCommand-schema.json",
+  "type": "object",
+  "title": "CreateMissionCommand",
+  "description": "Schema for CreateMissionCommand message",
+  "default": {},
+  "examples": [
+    {
+      "incidentId": "incident124",
+      "responderId": "6",
+      "responderStartLat": 34.15369,
+      "responderStartLong": -77.87232,
+      "incidentLat": 34.2242,
+      "incidentLong": -77.86778,
+      "destinationLat": 34.2461,
+      "destinationLong": -77.9519,
+      "processId": "0"
+    }
+  ],
+  "required": [
+    "incidentId",
+    "responderId",
+    "responderStartLat",
+    "responderStartLong",
+    "incidentLat",
+    "incidentLong",
+    "destinationLat",
+    "destinationLong",
+    "processId"
+  ],
+  "properties": {
+    "incidentId": {
+      "$id": "#/properties/incidentId",
+      "type": "string",
+      "title": "The incidentId schema",
+      "description": "The id of the incident.",
+      "default": "",
+      "examples": [
+        "incident124"
+      ]
+    },
+    "responderId": {
+      "$id": "#/properties/responderId",
+      "type": "string",
+      "title": "The responderId schema",
+      "description": "The id of the responder.",
+      "default": "",
+      "examples": [
+        "6"
+      ]
+    },
+    "responderStartLat": {
+      "$id": "#/properties/responderStartLat",
+      "type": "number",
+      "title": "The responderStartLat schema",
+      "description": "The latitude part of the responder location.",
+      "default": 0.0,
+      "examples": [
+        34.15369
+      ]
+    },
+    "responderStartLong": {
+      "$id": "#/properties/responderStartLong",
+      "type": "number",
+      "title": "The responderStartLong schema",
+      "description": "The longitude part of the responder location.",
+      "default": 0.0,
+      "examples": [
+        -77.87232
+      ]
+    },
+    "incidentLat": {
+      "$id": "#/properties/incidentLat",
+      "type": "number",
+      "title": "The incidentLat schema",
+      "description": "The latitude part of the incident location.",
+      "default": 0.0,
+      "examples": [
+        34.2242
+      ]
+    },
+    "incidentLong": {
+      "$id": "#/properties/incidentLong",
+      "type": "number",
+      "title": "The incidentLong schema",
+      "description": "The longitude part of the incident location.",
+      "default": 0.0,
+      "examples": [
+        -77.86778
+      ]
+    },
+    "destinationLat": {
+      "$id": "#/properties/destinationLat",
+      "type": "number",
+      "title": "The destinationLat schema",
+      "description": "The latitude part of the destination location.",
+      "default": 0.0,
+      "examples": [
+        34.2461
+      ]
+    },
+    "destinationLong": {
+      "$id": "#/properties/destinationLong",
+      "type": "number",
+      "title": "The destinationLong schema",
+      "description": "The longitude part of the destination location.",
+      "default": 0.0,
+      "examples": [
+        -77.9519
+      ]
+    },
+    "processId": {
+      "$id": "#/properties/processId",
+      "type": "string",
+      "title": "The processId schema",
+      "description": "The id of the process instance which orchestrates the incident.",
+      "default": "",
+      "examples": [
+        "0"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

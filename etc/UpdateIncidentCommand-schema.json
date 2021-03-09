@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://erdemo.io/UpdateIncidentCommand-schema.json",
+  "type": "object",
+  "title": "UpdateIncidentCommand",
+  "description": "Schema for UpdateIncidentCommand message",
+  "default": {},
+  "examples": [
+    {
+      "incident": {
+        "id": "incident123",
+        "status": "ASSIGNED"
+      }
+    }
+  ],
+  "required": [
+    "incident"
+  ],
+  "properties": {
+    "incident": {
+      "$id": "#/properties/incident",
+      "type": "object",
+      "title": "The incident schema",
+      "description": "The incident entity.",
+      "default": {},
+      "examples": [
+        {
+          "id": "incident123",
+          "status": "ASSIGNED"
+        }
+      ],
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$id": "#/properties/incident/properties/id",
+          "type": "string",
+          "title": "The id schema",
+          "description": "The id of the incident to update.",
+          "default": "",
+          "examples": [
+            "incident123"
+          ]
+        },
+        "status": {
+          "$id": "#/properties/incident/properties/status",
+          "type": "string",
+          "title": "The status schema",
+          "description": "The status of the incident to update.",
+          "default": "",
+          "examples": [
+            "ASSIGNED"
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

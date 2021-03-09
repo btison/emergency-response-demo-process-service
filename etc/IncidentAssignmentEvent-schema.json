@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://erdemo.io/IncidentAssignmentEvent-schema.json",
+  "type": "object",
+  "title": "IncidentAssignmentEvent",
+  "description": "Schema for IncidentAssignmentEvent message.",
+  "default": {},
+  "examples": [
+    {
+      "incidentId": "incident123",
+      "assignment": true,
+      "lat": 30.12345,
+      "lon": -77.98765
+    }
+  ],
+  "required": [
+    "incidentId",
+    "assignment",
+    "lat",
+    "lon"
+  ],
+  "properties": {
+    "incidentId": {
+      "$id": "#/properties/incidentId",
+      "type": "string",
+      "title": "The incidentId schema",
+      "description": "The id of the incident.",
+      "default": "",
+      "examples": [
+        "incident123"
+      ]
+    },
+    "assignment": {
+      "$id": "#/properties/assignment",
+      "type": "boolean",
+      "title": "The assignment schema",
+      "description": "Whether the incident has been assigned to a mission.",
+      "default": false,
+      "examples": [
+        true
+      ]
+    },
+    "lat": {
+      "$id": "#/properties/lat",
+      "type": "number",
+      "title": "The lat schema",
+      "description": "The latitude part of the location of the incident.",
+      "default": 0.0,
+      "examples": [
+        30.12345
+      ]
+    },
+    "lon": {
+      "$id": "#/properties/lon",
+      "type": "number",
+      "title": "The lon schema",
+      "description": "The longitude part of the location of the incident.",
+      "default": 0.0,
+      "examples": [
+        -77.98765
+      ]
+    }
+  },
+  "additionalProperties": true
+}

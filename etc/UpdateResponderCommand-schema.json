@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://erdemo.io/UpdateResponderCommand-schema.json",
+  "type": "object",
+  "title": "UpdateResponderCommand",
+  "description": "Schema for UpdateResponderCommand message",
+  "default": {},
+  "examples": [
+    {
+      "responder": {
+        "id": "responder123",
+        "name": "John Doe",
+        "phoneNumber": "111-222-333",
+        "latitude": 30.12345,
+        "longitude": -77.98765,
+        "boatCapacity": 10,
+        "medicalKit": true,
+        "available": true,
+        "enrolled": true,
+        "person": true
+      }
+    }
+  ],
+  "required": [
+    "responder"
+  ],
+  "properties": {
+    "responder": {
+      "$id": "#/properties/responder",
+      "type": "object",
+      "title": "The responder schema",
+      "description": "The responder entity",
+      "default": {},
+      "examples": [
+        {
+          "id": "responder123",
+          "name": "John Doe",
+          "phoneNumber": "111-222-333",
+          "latitude": 30.12345,
+          "longitude": -77.98765,
+          "boatCapacity": 10,
+          "medicalKit": true,
+          "available": true,
+          "enrolled": true,
+          "person": true
+        }
+      ],
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "$id": "#/properties/responder/properties/id",
+          "type": "string",
+          "title": "The id schema",
+          "description": "The id of the responder to update.",
+          "default": "",
+          "examples": [
+            "responder123"
+          ]
+        },
+        "name": {
+          "$id": "#/properties/responder/properties/name",
+          "type": "string",
+          "title": "The name schema",
+          "description": "The name of the responder to update.",
+          "default": "",
+          "examples": [
+            "John Doe"
+          ]
+        },
+        "phoneNumber": {
+          "$id": "#/properties/responder/properties/phoneNumber",
+          "type": "string",
+          "title": "The phoneNumber schema",
+          "description": "The phone number of the responder to update.",
+          "default": "",
+          "examples": [
+            "111-222-333"
+          ]
+        },
+        "latitude": {
+          "$id": "#/properties/responder/properties/latitude",
+          "type": "number",
+          "title": "The latitude schema",
+          "description": "The latitude part of the location of the responder to update.",
+          "default": 0.0,
+          "examples": [
+            30.12345
+          ]
+        },
+        "longitude": {
+          "$id": "#/properties/responder/properties/longitude",
+          "type": "number",
+          "title": "The longitude schema",
+          "description": "The longitude part of the location of the responder to update.",
+          "default": 0.0,
+          "examples": [
+            -77.98765
+          ]
+        },
+        "boatCapacity": {
+          "$id": "#/properties/responder/properties/boatCapacity",
+          "type": "integer",
+          "title": "The boatCapacity schema",
+          "description": "The capacity of the boat of the responder to update.",
+          "default": 0,
+          "examples": [
+            10
+          ]
+        },
+        "medicalKit": {
+          "$id": "#/properties/responder/properties/medicalKit",
+          "type": "boolean",
+          "title": "The medicalKit schema",
+          "description": "Whether the responder to update is has a medical assistance kit.",
+          "default": false,
+          "examples": [
+            true
+          ]
+        },
+        "available": {
+          "$id": "#/properties/responder/properties/available",
+          "type": "boolean",
+          "title": "The available schema",
+          "description": "Whether the responder to update is available for a mission.",
+          "default": false,
+          "examples": [
+            true
+          ]
+        },
+        "enrolled": {
+          "$id": "#/properties/responder/properties/enrolled",
+          "type": "boolean",
+          "title": "The enrolled schema",
+          "description": "Whether the responder to update is enrolled as a responder.",
+          "default": false,
+          "examples": [
+            true
+          ]
+        },
+        "person": {
+          "$id": "#/properties/responder/properties/person",
+          "type": "boolean",
+          "title": "The person schema",
+          "description": "Whether the responder to update is a bot or a person.",
+          "default": false,
+          "examples": [
+            true
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
